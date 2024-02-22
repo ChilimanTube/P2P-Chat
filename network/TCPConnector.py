@@ -3,7 +3,7 @@ import threading
 import json
 
 
-def handle_client(connection, address, messages_history):
+def handle_client(connection, messages_history):
     try:
         while True:
             data = connection.recv(1024)
@@ -38,16 +38,28 @@ def start_server(host, port, messages_history):
         server.close()
 
 
+def receive_complete_message(sock):
+    buffer = ''
+    while not buffer.endswith('\n'):
+        data = sock.recv(1024).decode()
+        if not data:
+            break  # Connection closed
+        buffer += data
+    return buffer.strip()
+
+
 def send_hello(peer_address, peer_port, peer_id):
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.connect((peer_address, peer_port))
-            hello_message = json.dumps({"command": "hello", "peer_id": peer_id})
+            hello_message = json.dumps({"command": "hello", "peer_id": peer_id}) + "\n"
             sock.sendall(hello_message.encode())
-            response = sock.recv(1024)
+            print(f"Sent hello message to {peer_address}:{peer_port}")
+            response = receive_complete_message(sock)
             response_message = json.loads(response)
             if response_message.get("status") == "ok":
                 print("Handshake successful.")
+                handle_client(sock, {})
             else:
                 print("Handshake failed.")
     except Exception as e:

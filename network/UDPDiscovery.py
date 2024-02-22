@@ -21,12 +21,17 @@ def broadcast_and_listen(peer_id, broadcast_address='172.31.255.255', port=9876)
     def listen_for_responses():
         while True:
             data, addr = sock.recvfrom(1024)
-            message = json.loads(data.decode())
-            if message.get("status") == "ok" and message.get("peer_id") != peer_id:
-                print(f"Received OK from {message['peer_id']} at {addr}")
-                peer_address = addr[0]
-                TCPConnector.send_hello(peer_address, port, peer_id)
-                threading.Thread(target=TCPConnector.send_hello, args=(peer_address, 9876, peer_id)).start()
+            try:
+                message = json.loads(data.decode())
+                # Ensure message is a dictionary before proceeding
+                if isinstance(message, dict) and message.get("status") == "ok" and message.get("peer_id") != peer_id:
+                    print(f"Received OK from {message['peer_id']} at {addr}")
+                    peer_address = addr[0]  # Extract IP address correctly
+                    threading.Thread(target=TCPConnector.send_hello, args=(peer_address, 9876, peer_id)).start()
+            except json.JSONDecodeError:
+                print(f"Received non-JSON data from {addr}: {data}")
+            except Exception as e:
+                print(f"Error handling message from {addr}: {e}")
 
     def broadcast_message():
         while True:
@@ -46,3 +51,4 @@ broadcast_and_listen(peer_id)
 # TODO: Delete the comment regarding SSH to the VM before publishing!
 # ssh -p 20462 jouda@dev.spsejecna.net  # s-kral5-2
 # ssh -p 20475 jouda@dev.spsejecna.net  # s-kral5-3
+# ssh -p 20110 jouda@dev.spsejecna.net  # molic-peer1
