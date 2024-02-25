@@ -7,7 +7,6 @@ message_times = []
 message_lock = threading.Lock()
 
 
-# Function to retrieve the entire messages history
 def get_messages_history():
     return messages_history
 
@@ -25,7 +24,6 @@ def add_message(message_id, peer_id, message_text):
         global message_times
         message_id_int = int(message_id)
         if len(message_times) >= 100:
-            # Remove the oldest message ID from the heap and also from messages_history
             oldest_message_id = heapq.heappop(message_times)
             oldest_message_id_str = str(oldest_message_id)
             if oldest_message_id_str in messages_history:

@@ -3,7 +3,7 @@ import json
 import threading
 from network import MessageHandler
 
-# TODO: Make BASE_URL configurable in a config file
+
 BASE_URL = 'http://127.0.0.1:8000'
 
 

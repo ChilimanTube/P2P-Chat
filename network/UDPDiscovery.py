@@ -12,11 +12,10 @@ def send_response(sock, addr, peer_id):
 
 
 def broadcast_and_listen(peer_id, broadcast_address='172.31.255.255', port=9876):
-    # Create a UDP socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    sock.bind(('', port)) # Bind to listen for responses
+    sock.bind(('', port))
 
     print("Starting TCP server...")
     threading.Thread(target=TCPConnector.start_server, args=('0.0.0.0', 9876, MessageHandler.get_messages_history()),
@@ -58,21 +57,5 @@ def broadcast_and_listen(peer_id, broadcast_address='172.31.255.255', port=9876)
             sock.sendto(message.encode(), (broadcast_address, port))
             time.sleep(5)
 
-    # Start listening thread
     threading.Thread(target=listen_for_responses, daemon=True).start()
-    # Start broadcasting
     broadcast_message()
-
-    # threading.Thread(target=TCPConnector.start_server, args=('localhost', 9876, MessageHandler.get_messages_history()),
-    #               daemon=True).start()
-
-
-peer_id = "renegade"
-broadcast_and_listen(peer_id)
-
-# TODO: Delete the comment regarding SSH to the VM before publishing!
-# ssh -p 20462 jouda@dev.spsejecna.net  # s-kral5-2
-# ssh -p 20475 jouda@dev.spsejecna.net  # s-kral5-3
-# ssh -p 20110 jouda@dev.spsejecna.net  # molic-peer1
-# ssh -p 20185 jouda@dev.spsejecna.net  # molic-peer2
-# ssh -p 20393 jouda@dev.spsejecna.net  # molic-peer3

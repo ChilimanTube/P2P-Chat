@@ -15,14 +15,12 @@ def handle_client(connection, messages_history):
             command = message.get("command")
             if command == "hello":
                 print("TCP: |LISTENER|: Received Hello command from", connection.getpeername())
-                # Send back the history of messages as a response
                 response = json.dumps({"status": "ok", "messages": messages_history}) + "\n"
                 connection.sendall(response.encode())
                 print("TCP: |LISTENER|: Sent:", response, "to", connection.getpeername())
                 print("TCP: |LISTENER|: Handshake successful.")
                 print("TCP: |LISTENER|: Number of messages stored:", MessageHandler.number_of_messages())
             elif command == "new_message":
-                # Add the new message to the history and acknowledge it
                 print("TCP: |LISTENER|: Received new message:", message["message"])
                 messages_history[message["message_id"]] = {"peer_id": message["peer_id"], "message": message["message"]}
                 response = json.dumps({"status": "ok"})
@@ -35,7 +33,7 @@ def handle_client(connection, messages_history):
 def start_server(host, port, messages_history):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((host, port))
-    server.listen(5)  # Listen for up to 5 connections
+    server.listen(5)
     print("TCP: Server listening on", host, port)
 
     try:
@@ -51,7 +49,7 @@ def receive_complete_message(sock):
     while not buffer.endswith('\n'):
         data = sock.recv(1024).decode()
         if not data:
-            break  # Connection closed
+            break
         buffer += data
     return buffer.strip()
 
@@ -68,11 +66,7 @@ def send_hello(peer_address, peer_port, peer_id):
             if response_message.get("status") == "ok":
                 print(f"TCP: |SENDER|: Received status OK from {peer_address}:{peer_port}")
                 print("TCP: |SENDER|: Handshake successful.")
-                # print("TCP: |SENDER|: Received:", response)
                 print("TCP: |SENDER|: Fetching messages...")
-                # RESPONSE_MESSAGE = message without the "status" key
-                # RESPONSE = message with the "status" key
-                # TODO: NEW MESSAGE IMPLEMENTATION
                 MessageHandler.update_local_history(response_message["messages"])
             else:
                 print("TCP: |SENDER|: Handshake failed.")
@@ -89,5 +83,6 @@ def send_new_message(peer_address, peer_port, message_id, message, peer_id):
         response = sock.recv(1024)
         print("TCP: Received:", response.decode())
 
+
 def get_new_message():
-    return "Klickova is in my walls!"
+    return ""
